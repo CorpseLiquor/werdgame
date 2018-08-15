@@ -50,9 +50,30 @@ int score_match( const std::string& word1,const std::string& word2 )
 	return score;
 }
 
+void loadFreqFile( std::vector<std::string>& freq_five_words ) {
+	std::ifstream freqFile( "20k.txt" );
+	for (std::string line; std::getline(freqFile, line); ) {
+		if (line.length() == 5) {
+			freq_five_words.push_back( line );
+		}
+	}
+}
+
+void sortFreqList( std::vector<std::string>& freq_five_words ) {
+	std::sort( freq_five_words.begin(), freq_five_words.end());
+}
+
+bool isInFreqList( const std::string searchTerm, const std::vector<std::string>& freq_five_words ) {
+	std::vector<std::string>::iterator it;
+
+	return (std::find( freq_five_words.begin(), freq_five_words.end(), searchTerm ) != freq_five_words.end());
+}
+
 int main()
 {
 	std::vector<std::string> five_words;
+	std::vector<std::string> freqList;
+	std::string testWord;
 	
 	{
 		std::ifstream five_word_file( "sgb-words.txt" );
@@ -66,9 +87,21 @@ int main()
 		}
 	}
 
+	loadFreqFile( freqList );
+	sortFreqList( freqList );
+
 	std::mt19937 rng( std::random_device{}() );
 	std::uniform_int_distribution<int> dist( 0,five_words.size() - 1 );
-	const std::string target = five_words[dist( rng )];
+
+	int five_words_index = dist( rng );
+
+	while (!isInFreqList( five_words[five_words_index], freqList )) {
+		five_words_index = dist( rng );
+	}
+
+	const std::string target = five_words[five_words_index];
+
+
 
 	while( true )
 	{
